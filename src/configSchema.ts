@@ -8,6 +8,8 @@ const ifSchema = Joi.object().keys({
 })
 
 const authSchema = Joi.object().keys({
+    key: Joi.string().optional(),
+    cert: Joi.string().optional(),
   basic: Joi.object().keys({
     username: Joi.string().required(),
     password: Joi.string().required(),
@@ -151,6 +153,8 @@ interface postDataObjectSchema {
 }
 
 interface authObjectSchema {
+  key:string,
+  cert:string,
   basic: {
     username: string,
     password: string,
