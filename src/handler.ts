@@ -10,6 +10,7 @@ import { config } from './configLoader';
  * @param dir [optional] Target directory
  * @param cmd The command, including all flags
  */
+
 export const start = async (dir:string , cmd: any) => {
 
   console.log();
@@ -28,10 +29,10 @@ export const start = async (dir:string , cmd: any) => {
   const colorizedTestFileAmount = colorizeMain(testFileAmount.toString());
   if(testFileAmount === 0) {
     writeMessage(chalk.hex(config.secondaryColor)('No testing files found'))
-    console.log()
+    console.log();
     return 1;
   }
-  
+
   writeMessage(`Found ${colorizedTestFileAmount} test file(s)`)
 
   // step 2 :read the test files
@@ -39,7 +40,7 @@ export const start = async (dir:string , cmd: any) => {
   // Array of yaml-to-json parsed config data of how to perform the requests
   const testSettings = yamlParser.parseTestingFiles(testFiles, dir)
 
-  // proof/check that all necessary config arguments are passed 
+  // proof/check that all necessary config arguments are passed
   const validateSchema = yamlParser.validateSchema(testSettings);
   const amountOfValidSchemas = validateSchema.proofedSettings.length;
 
@@ -66,7 +67,7 @@ export const start = async (dir:string , cmd: any) => {
 
 /**
  * Print out a formatted message
- * @param message 
+ * @param message
  */
 export const writeMessage = (message: string, isBold?: boolean) => {
   if(isBold === false) {
@@ -77,7 +78,7 @@ export const writeMessage = (message: string, isBold?: boolean) => {
 }
 /**
  * Print out a formatted message in red
- * @param message 
+ * @param message
  */
 export const writeErrorMessage = (message: string) => {
   writeMessage(colorizeCustomRed(message));
@@ -85,14 +86,14 @@ export const writeErrorMessage = (message: string) => {
 
 /**
  * Give the given string a color of #2ed573
- * @param message 
+ * @param message
  */
 export const colorizeMain = (message: string) => {
   return chalk.hex(config.primaryColor)(message);
 }
 /**
  * Give the given string a color of #ff4757
- * @param message 
+ * @param message
  */
 export const colorizeCustomRed = (message: string) => {
   return chalk.hex(config.errorColor)(message);

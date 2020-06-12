@@ -5,7 +5,7 @@ requests:
     request:
       url: https://postman-echo.com/basic-auth
       method: GET
-    auth: 
+    auth:
       basic:
         username: postman
         password: password

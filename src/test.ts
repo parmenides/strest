@@ -18,13 +18,21 @@ import {URLSearchParams} from 'url';
 import * as https from "https";
 import * as fs from "fs";
 import * as util from "util";
-const readFile =util.promisify(fs.readFile)
+import promRegistryFactory from "./promRegistryFactory";
+import {Counter} from "prom-client";
+//import promRegistryFactory from "./promRegistryFactory";
+
+const readFile = util.promisify(fs.readFile)
 
 var deepEql = require("deep-eql");
 var lineNumber = require('line-number');
 var getLineFromPos = require('get-line-from-pos');
 
 require('request-to-curl');
+
+const client = require('prom-client');
+const register = promRegistryFactory();
+
 
 nunjucksDate.setDefaultFormat('MMMM Do YYYY, h:mm:ss a');
 const nunjucksEnv = nunjucks.configure(".", {
@@ -93,6 +101,7 @@ export const performTests = async (testObjects: object[], cmd: any) => {
     if (testObjects.length > 1) {
         console.log(chalk.blueBright("Executing tests in " + curPath));
     }
+
     for (testObject of testObjects) {
 
         if (testObject['allowInsecure']) {
@@ -359,7 +368,8 @@ export const validateType = (type: Array<string>, dataToProof: any): boolean => 
     }
 
     return type.some(isType)
-}
+};
+
 
 /**
  * Perform the Request
@@ -477,7 +487,25 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
             statusText: response.statusText,
             headers: response.headers,
             content: response.data
+        };
+
+
+        let counter = register.getSingleMetric(requestName) as Counter<string>;
+        if (!counter) {
+            counter = new client.Counter({
+                name: requestName,
+                help: "Rest Api Testers",
+                labelNames: ['status', 'name', 'method', 'url']
+            });
+            register.registerMetric(counter);
         }
+
+        counter.inc({
+            status: har.status,
+            name: requestName,
+            method: requestObject.request.method,
+            url: requestObject.request.url
+        }, 1);
 
         requestReponses.set(requestName, har)
         let message = ""
