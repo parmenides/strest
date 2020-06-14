@@ -593,6 +593,14 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
         }
         return {isError: false, har: null, message: message, code: 0, curl: response.request.toCurl()}
     } catch (e) {
+        let counter = register.getSingleMetric(requestName) as Counter<string>;
+        counter.inc({
+            status: e.response.status,
+            name: requestName,
+            method: requestObject.request.method,
+            url: requestObject.request.url
+        }, 1);
+
         console.log(e.response.status)
         console.log(e.response.data)
         console.log("\nFailed request object: \n" + JSON.stringify(axiosObject, null, 2))
