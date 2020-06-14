@@ -13,8 +13,10 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node --tls-min-v1.0   dist/server.js",
-    "deploy:production": "npm run build && tar -h -cvf  strest.tar.gz test-conf node_modules package.json ecosystem.config.js .env && scp strest.tar.gz  $USER@$SERVER_IP:$SERVER_PATH && rm -rf strest.tar.gz",
+    "start:service": "pm2 start --name=strest dist/server.js  --node-args='--tls-min-v1.0' ",
+    "start:service:node10": "pm2 start --name=strest dist/server.js ",
+    "start": "node --tls-min-v1.0 dist/server.js",
+    "deploy": "npm run build && tar -h -cvf  strest.tar.gz test-conf dist node_modules package.json .env && scp strest.tar.gz  $USER@$SERVER_IP:$SERVER_PATH && rm -rf strest.tar.gz",
     "test": "strest tests/success",
     "publish": "tsc && npm publish"
   },
@@ -34,6 +36,7 @@
     "jsonfile": "^5.0.0",
     "jsonpath": "^1.0.0",
     "line-number": "0.1.0",
+    "minimum-tls-version": "0.0.3",
     "mkdirp": "^0.5.1",
     "nunjucks": "^3.1.3",
     "nunjucks-date": "^1.2.0",

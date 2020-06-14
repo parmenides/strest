@@ -4,7 +4,7 @@
     "moduleResolution": "node",
     "newLine": "LF",
     "outDir": "./dist/",
-    "target": "es5",
+    "target": "es2017",
     "sourceMap": false,
     "declaration": false,
     "jsx": "preserve",

@@ -20,6 +20,7 @@ import * as fs from "fs";
 import * as util from "util";
 import promRegistryFactory from "./promRegistryFactory";
 import {Counter} from "prom-client";
+import * as crypto from "crypto";
 //import {readFileSync} from "fs";
 //import promRegistryFactory from "./promRegistryFactory";
 
@@ -403,12 +404,13 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
         })
     }
 
+
     //Basic Auth
     let httpsAgent;
     if (typeof requestObject.auth !== 'undefined') {
         if (requestObject.auth.key && requestObject.auth.cert) {
-            const cert =await  readFile(requestObject.auth.cert);
-            const key =  await readFile(requestObject.auth.key);
+            const cert = await readFile(requestObject.auth.cert);
+            const key = await readFile(requestObject.auth.key);
             httpsAgent = new https.Agent({
                 rejectUnauthorized: false,
                 keepAlive: true,
@@ -428,7 +430,18 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
     if (typeof requestObject.request.queryString !== 'undefined') {
         let queryString = "?"
         for (let item of requestObject.request.queryString) {
-            queryString += item.name + "=" + item.value + "&"
+            if (item.name === 'hash' && requestObject.auth.key) {
+                // @ts-ignore
+                const privateKey = await readFile(requestObject.auth.hashKey, 'utf8');
+                const data = item.value;
+                const hash = crypto.createHash('SHA256');
+                hash.update(data);
+                const encryptedData = crypto.privateEncrypt(privateKey, new Buffer(hash.digest('hex')));
+                const hashed = encryptedData.toString('base64');
+                queryString += item.name + "=" + hashed + "&"
+            } else {
+                queryString += item.name + "=" + item.value + "&"
+            }
         }
         axiosObject.url += queryString.slice(0, -1)
     }
@@ -437,6 +450,19 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
     if (typeof requestObject.request.postData !== 'undefined') {
         axiosObject.headers["Content-Type"] = requestObject.request.postData.mimeType
         if (requestObject.request.postData.text) {
+
+            // @ts-ignore
+            if(requestObject.auth.hashKey && requestObject.request.postData.text.hash){
+                // @ts-ignore
+                const privateKey = await readFile(requestObject.auth.hashKey, 'utf8');
+                // @ts-ignore
+                const data = requestObject.request.postData.text.hash;
+                const hash = crypto.createHash('SHA256');
+                hash.update(data);
+                const encryptedData = crypto.privateEncrypt(privateKey, new Buffer(hash.digest('hex')));
+                // @ts-ignore
+                requestObject.request.postData.text.hash = encryptedData.toString('base64');
+            }
             axiosObject.data = requestObject.request.postData.text;
         }
 
@@ -447,16 +473,14 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
                     searchParams.append(item.name, item.value)
                 })
                 axiosObject.data = searchParams.toString();
-            }
-            else {
+            } else {
                 const form: FormData = new FormData();
                 requestObject.request.postData.params.forEach(item => {
                     if (item.value.startsWith('sendFile:')) {
                         const filePath = item.value.replace('sendFile:', '');
                         const fileStream = fs.createReadStream(filePath);
                         form.append(item.name, fileStream, {filepath: filePath});
-                    }
-                    else {
+                    } else {
                         form.append(item.name, item.value);
                     }
                 });
@@ -489,7 +513,6 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
             headers: response.headers,
             content: response.data
         };
-
 
         let counter = register.getSingleMetric(requestName) as Counter<string>;
         if (!counter) {
@@ -570,6 +593,8 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
         }
         return {isError: false, har: null, message: message, code: 0, curl: response.request.toCurl()}
     } catch (e) {
+        console.log(e.response.status)
+        console.log(e.response.data)
         console.log("\nFailed request object: \n" + JSON.stringify(axiosObject, null, 2))
         return {isError: true, har: null, message: e, code: 1}
     }

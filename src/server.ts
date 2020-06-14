@@ -3,8 +3,6 @@ import {Request, Response} from 'express'
 import promRegistryFactory from './promRegistryFactory'
 
 const register = promRegistryFactory()
-
-
 import {start} from './handler'
 
 const app = express();
@@ -23,7 +21,8 @@ app.listen(port, () => {
     console.log(`Ready to test and collect metrics, listening on: ${port} port`)
 });
 
+console.log(Number(process.env.EXECUTION_INTERVAL_IN_MS))
 setInterval(async () => {
     // @ts-ignore
     await start(process.env.ACCEPTANCE_TESTS_DIR, {})
-}, 60000)
+}, Number(process.env.EXECUTION_INTERVAL_IN_MS))
