@@ -5,3 +5,4 @@ validTypes.md
 package-lock.json
 test-conf
 strest_history.json
+.env
