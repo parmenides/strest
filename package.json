@@ -14,6 +14,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node --tls-min-v1.0   dist/server.js",
+    "deploy:production": "npm run build && tar -h -cvf strest.tar.gz node_modules package.json ecosystem.config.js GradingIEF.xml && scp strest.tar.gz  $USER@$SERVER_IP:$SERVER_PATH && rm -rf strest.tar.gz",
     "test": "strest tests/success",
     "publish": "tsc && npm publish"
   },
@@ -71,6 +72,7 @@
     "@types/recursive-readdir": "^2.2.0",
     "jest": "^23.6.0",
     "nodemon": "^2.0.4",
+    "pm2": "^4.4.0",
     "ts-jest": "^23.1.4",
     "ts-node": "^8.10.2",
     "tslint": "^6.1.2",
