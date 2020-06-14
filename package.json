@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node --tls-min-v1.0   dist/server.js",
-    "deploy:production": "npm run build && tar -h -cvf strest.tar.gz node_modules package.json ecosystem.config.js GradingIEF.xml && scp strest.tar.gz  $USER@$SERVER_IP:$SERVER_PATH && rm -rf strest.tar.gz",
+    "deploy:production": "npm run build && tar -h -cvf  strest.tar.gz test-conf node_modules package.json ecosystem.config.js .env && scp strest.tar.gz  $USER@$SERVER_IP:$SERVER_PATH && rm -rf strest.tar.gz",
     "test": "strest tests/success",
     "publish": "tsc && npm publish"
   },
@@ -24,6 +24,7 @@
     "chalk": "^2.4.1",
     "commander": "^2.17.1",
     "deep-eql": "4.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "faker": "^4.1.0",
     "form-data": "^2.3.3",

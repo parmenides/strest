@@ -2,7 +2,7 @@ const dotenv = require('dotenv/config')
 module.exports = {
     apps: [{
         "name": "credit",
-        "script": "./dist/strest.service.js",
+        "script": "./dist/server.js",
         "instances": "1",
         "exec_mode": "cluster",
         env: {
