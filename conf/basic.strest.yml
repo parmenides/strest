@@ -1,0 +1,39 @@
+version: 2
+
+requests:
+  karizaccountinfo:
+    auth:
+      cert: /home/payam/kariz-staging-key/kariz.crt.pem
+      key: /home/payam/kariz-staging-key/kariz.key.pem
+    request:
+      url: https://kariz.ab.net/kariz/account-info/v1/accounts/0202102329006
+      method: GET
+      queryString:
+        - name: hash
+          value: NIYffmSbO5AN55WCha4b8voiFkFIIBw375tVaEkaYB5L5Jr72qVnqla2TBGI8BdX6UX9UxOQZTWbeTTChYbxHUDkEJg+ZW3FPYF+aw63JzF03851HQ0P8DVnvXVdO5zDTGxqmTnD7AiDrFFPKGkJuvUxjXzoy3+cIZ2A479pCa9a614XwFLwPCdXyz+w13QRXoyD/zyrEo5Ok+EFP802FwYANdsDUCaK6ZTpIYkPUQ9jM9UGaEvW4zgG4IlbombaX5YRYWTa8ZCXU6IS9ClSIg2TH9oNtK7bdLNWHHwBeApSVDdgS773rbleGBnsB9eG/lWPFqslVy74N5Hr4DBoIQ==
+        - name: channel
+          value: FINNOTECH_TEST
+        - name: controlFlag
+          value: '0'
+        - name: pin
+          value: '1234'
+    validate:
+    - jsonpath: status
+      expect: 200
+  karizcustomerdeposit:
+    auth:
+      cert: /home/payam/kariz-staging-key/kariz.crt.pem
+      key: /home/payam/kariz-staging-key/kariz.key.pem
+    request:
+      url: https://kariz.ab.net/kariz/customer-deposits/v1/customer/0024604746
+      method: GET
+      queryString:
+        - name: hash
+          value: A1TRXLwUm8WUnG7ECUhSPK0f1CEZxjnj+bTGdJKmuoItAHr3FNviGl2grEQxZ2T3CEDw0Ph8LQJVSnqAKmOUVAYHAZs7wQZk8Nb7xgX903L/k9T5uucQioCVfXcqDtQ25x6h3anhXGJMgWlGIxYOld42bI8R9qfKk0NYvP1KLdHOarYIcjGoDjBA39MHiHDvzviiXRbj7mORiWKQk9klIGneNEH3XgVdvv1I46x8KokrXK1mf/GJP6VtH/4xAZMGTvg5Xz/9hIgkOoWaRStO+XfKoUNVuyKjDrFoVWrst55tN/ukn6Ha5vP4McVbu1L9wTHXiuq187qLt0gb70QCpQ==
+        - name: channel
+          value: FINNOTECH_TEST
+        - name: pin
+          value: '1234'
+    validate:
+    - jsonpath: status
+      expect: 200

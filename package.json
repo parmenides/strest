@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "start": "node --tls-min-v1.0   dist/server.js",
     "test": "strest tests/success",
     "publish": "tsc && npm publish"
   },

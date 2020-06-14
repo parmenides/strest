@@ -699,7 +699,15 @@ config:
   secondaryColor: "#ff4757" # Hexadecimal Color Code
   errorColor: "#576574" # Hexadecimal Color Code
 ```
+## Extract key and cert from p12
+```shell script
+openssl pkcs12 -in my.p12 -out file.key.pem -nocerts -nodes
+openssl pkcs12 -in my.p12 -out file.crt.pem -clcerts -nokeys
+```
+
 
 ## License
 
 Strest is [MIT Licensed](LICENSE)
+
+

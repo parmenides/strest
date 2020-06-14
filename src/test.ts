@@ -20,6 +20,7 @@ import * as fs from "fs";
 import * as util from "util";
 import promRegistryFactory from "./promRegistryFactory";
 import {Counter} from "prom-client";
+//import {readFileSync} from "fs";
 //import promRegistryFactory from "./promRegistryFactory";
 
 const readFile = util.promisify(fs.readFile)
@@ -406,13 +407,13 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
     let httpsAgent;
     if (typeof requestObject.auth !== 'undefined') {
         if (requestObject.auth.key && requestObject.auth.cert) {
-            const cert = await readFile(requestObject.auth.cert);
-            const key = await readFile(requestObject.auth.key);
+            const cert =await  readFile(requestObject.auth.cert);
+            const key =  await readFile(requestObject.auth.key);
             httpsAgent = new https.Agent({
                 rejectUnauthorized: false,
                 keepAlive: true,
-                pfx: key,
-                ca: cert
+                key,
+                cert
             });
         }
         if (typeof requestObject.auth.basic !== 'undefined') {
