@@ -3,5 +3,5 @@ node_modules/
 yarn.lock
 validTypes.md
 package-lock.json
-conf
+test-conf
 strest_history.json
