@@ -19,7 +19,7 @@ import * as https from "https";
 import * as fs from "fs";
 import * as util from "util";
 import promRegistryFactory from "./promRegistryFactory";
-import {Counter} from "prom-client";
+import {Counter, Gauge} from "prom-client";
 import * as crypto from "crypto";
 //import {readFileSync} from "fs";
 //import promRegistryFactory from "./promRegistryFactory";
@@ -452,7 +452,7 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
         if (requestObject.request.postData.text) {
 
             // @ts-ignore
-            if(requestObject.auth.hashKey && requestObject.request.postData.text.hash){
+            if (requestObject.auth.hashKey && requestObject.request.postData.text.hash) {
                 // @ts-ignore
                 const privateKey = await readFile(requestObject.auth.hashKey, 'utf8');
                 // @ts-ignore
@@ -514,15 +514,26 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
             content: response.data
         };
 
-        let counter = register.getSingleMetric(requestName) as Counter<string>;
+        let counter = register.getSingleMetric(`${requestName}_counter`) as Counter<string>;
         if (!counter) {
             counter = new client.Counter({
-                name: requestName,
+                name: `${requestName}_counter`,
                 help: "Rest Api Testers",
                 labelNames: ['status', 'name', 'method', 'url']
             });
             register.registerMetric(counter);
         }
+
+        let gauge = register.getSingleMetric(`${requestName}_gauge`) as Gauge<string>;
+        if (!gauge) {
+            gauge = new client.Gauge({
+                name: `${requestName}_gauge`,
+                help: `${requestName} gauge`,
+                labelNames: ['status', 'name', 'method', 'url']
+            });
+            register.registerMetric(gauge);
+        }
+        gauge.set(har.status)
 
         counter.inc({
             status: har.status,
@@ -593,10 +604,11 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
         }
         return {isError: false, har: null, message: message, code: 0, curl: response.request.toCurl()}
     } catch (e) {
-        let counter = register.getSingleMetric(requestName) as Counter<string>;
+        console.log(e)
+        let counter = register.getSingleMetric(`${requestName}_counter`) as Counter<string>;
         if (!counter) {
             counter = new client.Counter({
-                name: requestName,
+                name: `${requestName}_counter`,
                 help: "Rest Api Testers",
                 labelNames: ['status', 'name', 'method', 'url']
             });
@@ -608,6 +620,17 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
             method: requestObject.request.method,
             url: requestObject.request.url
         }, 1);
+
+        let gauge = register.getSingleMetric(`${requestName}_gauge`) as Gauge<string>;
+        if (!gauge) {
+            gauge = new client.Gauge({
+                name: `${requestName}_gauge`,
+                help: `${requestName} gauge`,
+                labelNames: ['status', 'name', 'method', 'url']
+            });
+            register.registerMetric(gauge);
+        }
+        gauge.set(e.response.status);
 
         console.log(e.response.status)
         console.log(e.response.data)
