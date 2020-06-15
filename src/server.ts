@@ -24,5 +24,5 @@ app.listen(port, () => {
 console.log(Number(process.env.EXECUTION_INTERVAL_IN_MS))
 setInterval(async () => {
     // @ts-ignore
-    await start(process.env.ACCEPTANCE_TESTS_DIR, {})
+    await start(process.env.ACCEPTANCE_TESTS_DIR, {noExit:true})
 }, Number(process.env.EXECUTION_INTERVAL_IN_MS))

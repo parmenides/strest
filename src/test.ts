@@ -594,6 +594,14 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
         return {isError: false, har: null, message: message, code: 0, curl: response.request.toCurl()}
     } catch (e) {
         let counter = register.getSingleMetric(requestName) as Counter<string>;
+        if (!counter) {
+            counter = new client.Counter({
+                name: requestName,
+                help: "Rest Api Testers",
+                labelNames: ['status', 'name', 'method', 'url']
+            });
+            register.registerMetric(counter);
+        }
         counter.inc({
             status: e.response.status,
             name: requestName,
