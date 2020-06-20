@@ -430,7 +430,7 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
     if (typeof requestObject.request.queryString !== 'undefined') {
         let queryString = "?"
         for (let item of requestObject.request.queryString) {
-            if (item.name === 'hash' && requestObject.auth.key) {
+            if (item.name === 'hash' && requestObject.auth && requestObject.auth.hashKey) {
                 // @ts-ignore
                 const privateKey = await readFile(requestObject.auth.hashKey, 'utf8');
                 const data = item.value;
@@ -452,7 +452,7 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
         if (requestObject.request.postData.text) {
 
             // @ts-ignore
-            if (requestObject.auth.hashKey && requestObject.request.postData.text.hash) {
+            if (requestObject.auth && requestObject.auth.hashKey && requestObject.request.postData.text.hash) {
                 // @ts-ignore
                 const privateKey = await readFile(requestObject.auth.hashKey, 'utf8');
                 // @ts-ignore
@@ -533,7 +533,12 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
             });
             register.registerMetric(gauge);
         }
-        gauge.set(har.status)
+        gauge.set({
+            status: har.status,
+            name: requestName,
+            method: requestObject.request.method,
+            url: requestObject.request.url
+        },har.status)
 
         counter.inc({
             status: har.status,
@@ -562,11 +567,13 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
                     }
                     if (!deepEql(validate.expect, jsonPathValue)) {
                         let err = validationError(`The JSON response value should have been ${chalk.bold(expectResult)} but instead it was ${chalk.bold(valueResult)}`);
+                        console.log('expect')
                         return {isError: true, har: har, message: err, code: 1, curl: response.request.toCurl()}
                     } else {
                         message = message + "jsonpath " + validate.jsonpath + "(" + expectResult + ")" + " equals " + valueResult + "\n"
                     }
                 }
+
                 if (validate.type) {
                     let validated = validateType(validate.type, jsonPathValue)
                     if (!validated) {
@@ -581,11 +588,13 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
                     let validated = ajv.validate(validate.jsonschema, jsonPathValue);
                     if (!validated) {
                         let err = validationError(`The jsonschema ${chalk.bold(JSON.stringify(validate.jsonschema))} did not validate against ${chalk.bold(JSON.stringify(jsonPathValue))}`);
+                        console.log('jsonschema')
                         return {isError: true, har: har, message: err, code: 1, curl: response.request.toCurl()}
                     } else {
                         message = message + "jsonpath " + validate.jsonpath + "(" + jsonPathValue + ")" + " jsonschema validated on " + validate.jsonschema + "\n"
                     }
                 }
+
                 if (validate.regex) {
                     let regex = RegExp(validate.regex);
                     let validated = regex.test(jsonPathValue)
@@ -630,7 +639,12 @@ const performRequest = async (requestObject: requestsObjectSchema, requestName: 
             });
             register.registerMetric(gauge);
         }
-        gauge.set(e.response.status);
+        gauge.set({
+            status: e.response.status,
+            name: requestName,
+            method: requestObject.request.method,
+            url: requestObject.request.url
+        }, e.response.status);
 
         console.log(e.response.status)
         console.log(e.response.data)
